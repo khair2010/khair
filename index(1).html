@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خير - لإدارة يومك</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0D0D0D;
+            --bg2: #1A1A1A;
+            --bg3: #242424;
+            --text: #FFF;
+            --text2: #AAA;
+            --border: #333;
+        }
+
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-top: 60px;
+        }
+
+        /* Fixed Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            height: 56px;
+        }
+
+        .top-bar h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .top-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .top-btn {
+            padding: 8px 14px;
+            background: var(--bg3);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .top-btn:hover { background: var(--border); }
+        .top-btn.danger { color: #CCC; }
+        .top-btn.danger:hover { background: #333; color: #FFF; }
+
+        /* Colors Dropdown */
+        .colors-menu {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 101;
+        }
+
+        .colors-menu.show { display: flex; }
+
+        .color-btn {
+            padding: 10px 20px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .color-btn:hover { background: var(--border); }
+        .color-btn.active { border-color: #555; background: var(--bg); }
+
+        /* Main Content */
+        .main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+        }
+
+        /* Quote */
+        .quote {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            padding: 28px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .quote p {
+            font-size: 18px;
+            font-style: italic;
+            color: var(--text2);
+        }
+
+        /* Date */
+        .date-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .date-day { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+        .date-full { font-size: 13px; color: var(--text2); }
+
+        /* Greeting */
+        .greeting {
+            text-align: center;
+            color: var(--text2);
+            margin-bottom: 28px;
+            font-size: 16px;
+        }
+
+        /* Pillars Grid */
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .pillar {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pillar:hover { background: var(--bg3); }
+        .pillar h3 { font-size: 17px; margin-bottom: 2px; }
+        .pillar span { font-size: 12px; color: var(--text2); }
+        .pillar-bar { height: 5px; background: var(--border); border-radius: 3px; margin: 12px 0 8px; overflow: hidden; }
+        .pillar-fill { height: 100%; background: #555; border-radius: 3px; transition: width 0.5s; }
+        .pillar-stat { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
+
+        /* Journal */
+        .journal {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+        }
+
+        .journal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .journal-head h2 { font-size: 18px; }
+        .journal-add { padding: 8px 16px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; font-family: inherit; transition: all 0.3s; }
+        .journal-add:hover { background: var(--border); }
+
+        .journal-list { max-height: 240px; overflow-y: auto; }
+
+        .entry {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .entry:hover { border-color: #444; }
+        .entry-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .entry-date { font-size: 13px; font-weight: 600; color: var(--text2); }
+        .entry-mood { font-size: 20px; }
+        .entry-content { font-size: 14px; color: var(--text2); }
+
+        .empty { text-align: center; padding: 40px; color: var(--text2); }
+
+        /* Modal */
+        .modal-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+        }
+
+        .modal-bg.show { display: flex; }
+
+        .modal {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-head {
+            padding: 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-head h3 { font-size: 17px; }
+        .modal-close { width: 30px; height: 30px; background: var(--bg3); border: 1px solid var(--border); border-radius: 50%; color: var(--text); cursor: pointer; font-size: 14px; }
+        .modal-close:hover { background: #333; }
+
+        .modal-body { padding: 18px; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-label { display: block; margin-bottom: 6px; font-size: 14px; }
+        .form-input { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 14px; }
+        .form-input:focus { outline: none; border-color: #444; }
+        textarea.form-input { min-height: 90px; resize: vertical; }
+
+        .mood-row { display: flex; gap: 10px; justify-content: center; margin: 14px 0; }
+        .mood-opt { font-size: 26px; cursor: pointer; padding: 6px; border-radius: 50%; transition: all 0.3s; }
+        .mood-opt:hover, .mood-opt.selected { background: var(--bg3); transform: scale(1.2); }
+
+        .submit-btn { width: 100%; padding: 14px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; font-family: inherit; font-size: 15px; font-weight: 600; transition: all 0.3s; }
+        .submit-btn:hover { background: var(--border); }
+
+        .tasks-list { max-height: 220px; overflow-y: auto; margin-bottom: 14px; }
+
+        .task { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg); border-radius: 8px; margin-bottom: 6px; }
+        .task input[type="checkbox"] { width: 18px; height: 18px; }
+        .task span { flex: 1; font-size: 14px; }
+        .task.done span { text-decoration: line-through; color: var(--text2); }
+        .task-del { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 11px; opacity: 0; }
+        .task:hover .task-del { opacity: 1; }
+
+        .add-task { display: flex; gap: 8px; }
+        .add-task input { flex: 1; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 13px; }
+        .add-task input:focus { outline: none; border-color: #444; }
+        .add-task button { padding: 10px 16px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; font-family: inherit; font-weight: 600; }
+        .add-task button:hover { background: var(--border); }
+
+        /* Auth Pages */
+        .auth-page {
+            display: none;
+            min-height: calc(100vh - 60px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-page.active { display: flex; }
+
+        .auth-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .auth-logo { text-align: center; margin-bottom: 30px; }
+        .auth-logo h1 { font-size: 40px; font-weight: 700; margin-bottom: 6px; }
+        .auth-logo p { color: var(--text2); font-size: 14px; }
+
+        .auth-form { margin-bottom: 20px; }
+        .auth-error { color: #CCC; font-size: 13px; margin-top: 8px; display: none; padding: 10px; background: var(--bg); border-radius: 8px; }
+        .auth-error.show { display: block; }
+        .auth-success { color: var(--text2); font-size: 13px; margin-top: 8px; display: none; padding: 10px; background: var(--bg); border-radius: 8px; }
+        .auth-success.show { display: block; }
+
+        .auth-foot { text-align: center; color: var(--text2); font-size: 14px; }
+        .auth-foot a { color: var(--text2); cursor: pointer; text-decoration: none; }
+        .auth-foot a:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            .pillars { grid-template-columns: 1fr; }
+            .top-bar { padding: 10px 14px; }
+            .top-bar h1 { font-size: 18px; }
+            .top-btn { padding: 6px 10px; font-size: 12px; }
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <h1>خير</h1>
+        <div class="top-btns">
+            <button class="top-btn" onclick="toggleColors()">الألوان</button>
+            <button class="top-btn" onclick="toggleLang()"><span id="langText">EN</span></button>
+            <button class="top-btn danger" onclick="logout()">خروج</button>
+        </div>
+    </div>
+
+    <!-- Colors Menu -->
+    <div class="colors-menu" id="colorsMenu">
+        <button class="color-btn active" onclick="setColor('dark')">أسود</button>
+        <button class="color-btn" onclick="setColor('white')">أبيض</button>
+        <button class="color-btn" onclick="setColor('gray')">رمادي</button>
+    </div>
+
+    <!-- Login Page -->
+    <div class="auth-page active" id="loginPage">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>خير</h1>
+                <p id="loginSub">لإدارة يومك بشكل أفضل</p>
+            </div>
+            <form class="auth-form" onsubmit="doLogin(event)">
+                <div class="form-group">
+                    <label class="form-label" id="emailLbl">البريد الإلكتروني</label>
+                    <input type="email" class="form-input" id="emailIn" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="passLbl">كلمة المرور</label>
+                    <input type="password" class="form-input" id="passIn" placeholder="••••••••" required>
+                </div>
+                <div class="auth-error" id="loginErr"></div>
+                <button type="submit" class="submit-btn" id="loginBtn">تسجيل الدخول</button>
+            </form>
+            <div class="auth-foot">
+                <a onclick="showPage('forgotPage')" id="forgotLnk">نسيت كلمة المرور؟</a>
+                <br><br>
+                <span id="noAcc">ليس لديك حساب؟</span>
+                <a onclick="showPage('registerPage')" id="regLnk"> إنشاء حساب</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div class="auth-page" id="registerPage">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>خير</h1>
+                <p id="regSub">أنشئ حسابك الجديد</p>
+            </div>
+            <form class="auth-form" onsubmit="doRegister(event)">
+                <div class="form-group">
+                    <label class="form-label" id="nameLbl">الاسم</label>
+                    <input type="text" class="form-input" id="nameIn" placeholder="اسمك الكامل" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="regEmailLbl">البريد الإلكتروني</label>
+                    <input type="email" class="form-input" id="regEmailIn" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="regPassLbl">كلمة المرور</label>
+                    <input type="password" class="form-input" id="regPassIn" placeholder="8 أحرف على الأقل" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="confirmLbl">تأكيد كلمة المرور</label>
+                    <input type="password" class="form-input" id="confirmIn" placeholder="أعد كتابة كلمة المرور" required>
+                </div>
+                <div class="auth-error" id="regErr"></div>
+                <div class="auth-success" id="regSuccess"></div>
+                <button type="submit" class="submit-btn" id="regBtn">إنشاء الحساب</button>
+            </form>
+            <div class="auth-foot">
+                <span id="hasAcc">لديك حساب؟</span>
+                <a onclick="showPage('loginPage')" id="loginLnk"> تسجيل الدخول</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Page -->
+    <div class="auth-page" id="forgotPage">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <h1>خير</h1>
+                <p id="forgotSub">استعادة كلمة المرور</p>
+            </div>
+            <form class="auth-form" onsubmit="doForgot(event)">
+                <div class="form-group">
+                    <label class="form-label" id="forgotEmailLbl">البريد الإلكتروني</label>
+                    <input type="email" class="form-input" id="forgotEmailIn" placeholder="example@email.com" required>
+                </div>
+                <div class="auth-error" id="forgotErr"></div>
+                <div class="auth-success" id="forgotSuccess"></div>
+                <button type="submit" class="submit-btn" id="forgotBtn">إرسال</button>
+            </form>
+            <div class="auth-foot">
+                <a onclick="showPage('loginPage')" id="backLnk"> العودة لتسجيل الدخول</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="main" id="dashboard" style="display: none;">
+        <div class="quote">
+            <p id="quoteText">"من عرف نفسه فقد عرف ربه"</p>
+        </div>
+
+        <div class="date-box">
+            <div class="date-day" id="dayName">الخميس</div>
+            <div class="date-full" id="fullDate">23 يناير 2026</div>
+        </div>
+
+        <p class="greeting" id="greeting">صباح الخير! اليوم فرصة جديدة للتقدم</p>
+
+        <div class="pillars" id="pillarsGrid"></div>
+
+        <div class="journal">
+            <div class="journal-head">
+                <h2><span id="journalTitle">التدوين اليومي</span></h2>
+                <button class="journal-add" onclick="openJournal()">+ إضافة</button>
+            </div>
+            <div class="journal-list" id="journalList"></div>
+        </div>
+    </div>
+
+    <!-- Pillar Modal -->
+    <div class="modal-bg" id="pillarModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h3 id="pillarTitle">الروح</h3>
+                <button class="modal-close" onclick="closePillar()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="tasks-list" id="tasksList"></div>
+                <div class="add-task">
+                    <input type="text" id="taskInput" placeholder="أضف مهمة...">
+                    <button onclick="addTask()">إضافة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal Modal -->
+    <div class="modal-bg" id="journalModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h3><span id="journalModalTitle">تدوينة جديدة</span></h3>
+                <button class="modal-close" onclick="closeJournal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" id="dateLbl">التاريخ</label>
+                    <input type="date" class="form-input" id="journalDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="moodLbl">المزاج</label>
+                    <div class="mood-row">
+                        <span class="mood-opt" data-mood="great" onclick="pickMood(this)">😀</span>
+                        <span class="mood-opt" data-mood="good" onclick="pickMood(this)">🙂</span>
+                        <span class="mood-opt" data-mood="okay" onclick="pickMood(this)">😐</span>
+                        <span class="mood-opt" data-mood="bad" onclick="pickMood(this)">😔</span>
+                        <span class="mood-opt" data-mood="terrible" onclick="pickMood(this)">😢</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="contentLbl">المحتوى</label>
+                    <textarea class="form-input" id="journalContent" placeholder="اكتب هنا..."></textarea>
+                </div>
+                <button class="submit-btn" onclick="saveJournal()">حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quotes = [
+            "من عرف نفسه فقد عرف ربه", "العلم أمام العمل", "عظمة عقلك تخلق حسادك", "الشك بداية الحكمة", "الوقت ينسي الألم",
+            "أنا أفكر إذن أنا موجود", "الخيال أهم من المعرفة", "المعرفة قوة", "العدل أساس الملك", "نحن ما نفعله مراراً",
+            "الحياة التي لا تُختبر لا تستحق العيش", "الضربة التي لا تقتلك تقويك", "العقل قوة لا يستهان بها", "السعادة تأتي من أفعالك", "أفضل طريقة للتنبؤ بالمستقبل هي اختراعه",
+            "الفقر والد الجريمة", "الجاهل يؤكد والعالم يشك", "ابدأ حيث أنت واستخدم ما لديك", "الانضباط جسر الإنجازات", "عقلك حديقة وأفكارك بذور",
+            "كن أنت التغيير الذي تريده", "الصمت قوة", "الفشل جزء من النجاح", "الإرادة تقصر المسافات", "السر في البدء",
+            "الثروة هي القدرة على عيش الحياة", "الجمال في البساطة", "استثمر في نفسك أولاً", "المال خادم جيد وسيد سيء", "الراحة عدو الإنجاز",
+            "التغيير يبدأ من الداخل", "العلم ترياق الجهل", "العمل الشاق يهزم الموهبة", "كل إنجاز بدأ بقرار المحاولة", "من أراد نور القلب فليترك ما لا يعنيه",
+            "الناس من خوف الذل في ذل", "كل عز لا يؤيده علم فإلى ذل يصير", "النفس إن لم تشغلها بالحق شغلتك بالباطل", "العلم بلا عمل كالشجر بلا ثمر", "الجمال يكمن في الروح",
+            "المال لا يشتري السعادة بل يريح المعاناة", "الحياة مدرسة والناس دروس", "كن صبوراً مع نفسك فالنمو بطيء", "الأهداف أحلام بمواعيد", "لا تشغل بالك بمن لا يهتم بك",
+            "الناجحون يصنعون بالتعب", "عظمة الإنسان في قلبه لا منصبه", "العقل كالمظلة لا يعمل إلا وهو مفتوح", "البساطة قمة التعقيد", "تكلم لكي أراك",
+            "السر في النجاح هو الثبات على الهدف", "العلم هو الخير الوحيد", "من لا يخطئ لا يبدع", "لا تقاس العقول بالأعمار", "الخوف من الفشل هو الفشل",
+            "ابتسم فالحياة قصيرة", "ركز على ما تملك", "الصديق الحقيقي يرفعك", "الجمال في الروح والجسد وعاء", "تعلم قول لا لما يضيع وقتك",
+            "النجاح يبدأ من حيث انتهى الآخرون", "لا تنتظر الفرصة بل اصنعها", "العقل الفارغ مختبر للشيطان", "كن قوياً لتواجه الحقيقة", "التسامح سلاح الأقوياء",
+            "المستقبل لمن يؤمن بجمال أحلامه", "المال يذهب والمعرفة تبقى", "التواضع سمة العظماء", "لا تجعل الماضي يسرق الحاضر", "الفكر بذور الفعل",
+            "الصدق فصل الحكمة الأول", "نحتاج للقليل من اللطف", "الإنجاز العظيم يتطلب وقتاً", "كن لطيفاً فالكل يقاتل في معركة ما", "الإبداع رؤية ما لا يراه غيرك",
+            "المنطق يوصلك من أ إلى ب والخيال لكل مكان", "الخبرة مدرسة رسومها غالية", "العمل المنظم يقتل التوتر", "النمو يحدث خارج منطقة الراحة", "الحياة مغامرة أو لا شيء",
+            "لا تحكم على الكتاب من غلافه", "الهدوء لغة العقلاء", "توقف عن الشكوى وابدأ بالتغيير", "السعادة معدية فانشرها", "العلم يرفع بيوتاً لا عماد لها",
+            "النجاح هو أن تحب ما تفعل", "لا مستحيل في قاموس الأقوياء", "أنت حيث قادتك أفكارك", "تطبيق خير بوابتك للأفضل", "الوقت هو العملة الوحيدة التي تملكها",
+            "أعظم خطأ هو الخوف من الخطأ", "لا تقارن بدايتك بمنتصف الآخرين", "الحق يحتاج لقوة تحميه", "بالعلم تجذب العقول وبالأخلاق تجذب القلوب", "من لم يتجدد يتبدد",
+            "الإصرار يغلب الذكاء", "القراءة تمنحنا مكاناً نذهب إليه", "كن أنت ولا تكن هم", "الحياة ليست بحثاً عن الذات بل صنعاً لها", "خير الناس أنفعهم للناس"
+        ];
+
+        const pillars = [
+            { id: 'spirit', name: 'الروح', en: 'Soul' },
+            { id: 'career', name: 'المهنة', en: 'Career' },
+            { id: 'mind', name: 'العقل', en: 'Mind' },
+            { id: 'body', name: 'الجسد', en: 'Body' },
+            { id: 'social', name: 'الاجتماع', en: 'Social' },
+            { id: 'family', name: 'العائلة', en: 'Family' },
+            { id: 'finance', name: 'المال', en: 'Finance' },
+            { id: 'self', name: 'النفس', en: 'Self' }
+        ];
+
+        const t = {
+            ar: {
+                loginSub: 'لإدارة يومك بشكل أفضل',
+                regSub: 'أنشئ حسابك الجديد',
+                forgotSub: 'استعادة كلمة المرور',
+                emailLbl: 'البريد الإلكتروني', passLbl: 'كلمة المرور', nameLbl: 'الاسم',
+                regEmailLbl: 'البريد الإلكتروني', regPassLbl: 'كلمة المرور', confirmLbl: 'تأكيد كلمة المرور',
+                forgotEmailLbl: 'البريد الإلكتروني',
+                loginBtn: 'تسجيل الدخول', regBtn: 'إنشاء الحساب', forgotBtn: 'إرسال',
+                forgotLnk: 'نسيت كلمة المرور؟', noAcc: 'ليس لديك حساب؟', regLnk: ' إنشاء حساب',
+                hasAcc: 'لديك حساب؟', loginLnk: ' تسجيل الدخول', backLnk: ' العودة لتسجيل الدخول',
+                journalTitle: 'التدوين اليومي', dateLbl: 'التاريخ', moodLbl: 'المزاج', contentLbl: 'المحتوى',
+                greeting: 'صباح الخير! اليوم فرصة جديدة للتقدم', eveningGreeting: 'مساء الخير! راجع إنجازاتك اليوم',
+                noTasks: 'لا توجد مهام بعد', noJournals: 'لا توجد تدوينات بعد',
+                errEmail: 'البريد الإلكتروني مطلوب', errPass: 'كلمة المرور مطلوبة',
+                errShort: '8 أحرف على الأقل', errMatch: 'كلمة المرور غير متطابقة',
+                errExists: 'البريد مستخدم', errWrong: 'بيانات غير صحيحة', errName: 'الاسم مطلوب',
+                errNotFound: 'البريد غير مسجل', successReg: 'تم إنشاء الحساب!', successForgot: 'تم الإرسال لبريدك',
+                dayNames: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+                months: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+            },
+            en: {
+                loginSub: 'For better day management',
+                regSub: 'Create your new account',
+                forgotSub: 'Recover your password',
+                emailLbl: 'Email', passLbl: 'Password', nameLbl: 'Name',
+                regEmailLbl: 'Email', regPassLbl: 'Password', confirmLbl: 'Confirm Password',
+                forgotEmailLbl: 'Email',
+                loginBtn: 'Sign In', regBtn: 'Create Account', forgotBtn: 'Send',
+                forgotLnk: 'Forgot Password?', noAcc: "Don't have an account?", regLnk: ' Sign up',
+                hasAcc: 'Already have an account?', loginLnk: ' Sign in', backLnk: ' Back to login',
+                journalTitle: 'Daily Journal', dateLbl: 'Date', moodLbl: 'Mood', contentLbl: 'Content',
+                greeting: 'Good Morning! Today is a new opportunity', eveningGreeting: 'Good Evening! Review your achievements',
+                noTasks: 'No tasks yet', noJournals: 'No entries yet',
+                errEmail: 'Email is required', errPass: 'Password is required',
+                errShort: 'At least 8 characters', errMatch: 'Passwords do not match',
+                errExists: 'Email already registered', errWrong: 'Invalid credentials', errName: 'Name is required',
+                errNotFound: 'Email not registered', successReg: 'Account created!', successForgot: 'Sent to your email',
+                dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+            }
+        };
+
+        let lang = localStorage.getItem('khayrLang') || 'ar';
+        let color = localStorage.getItem('khayrColor') || 'dark';
+        let user = localStorage.getItem('khayrUser');
+        let currentPillar = null;
+        let currentMood = null;
+        let editJournalId = null;
+
+        function init() {
+            applyColor(color);
+            applyLang(lang);
+
+            if (!localStorage.getItem('khayrUsers')) {
+                localStorage.setItem('khayrUsers', JSON.stringify([{ email: 'demo@khayr.com', password: 'demo123', name: 'مستخدم' }]));
+            }
+            if (!localStorage.getItem('khayrTasks')) {
+                const tasks = {};
+                pillars.forEach(p => tasks[p.id] = []);
+                localStorage.setItem('khayrTasks', JSON.stringify(tasks));
+            }
+            if (!localStorage.getItem('khayrJournals')) {
+                localStorage.setItem('khayrJournals', JSON.stringify([]));
+            }
+
+            if (user) showDash(); else showPage('loginPage');
+
+            renderPillars();
+            renderJournals();
+            updateDate();
+            rotateQuote();
+            setInterval(rotateQuote, 30000);
+        }
+
+        function toggleColors() {
+            document.getElementById('colorsMenu').classList.toggle('show');
+        }
+
+        function setColor(c) {
+            color = c;
+            localStorage.setItem('khayrColor', c);
+            applyColor(c);
+            document.getElementById('colorsMenu').classList.remove('show');
+        }
+
+        function applyColor(c) {
+            const r = document.documentElement;
+            if (c === 'white') {
+                r.style.setProperty('--bg', '#FFF');
+                r.style.setProperty('--bg2', '#F5F5F5');
+                r.style.setProperty('--bg3', '#EEE');
+                r.style.setProperty('--text', '#111');
+                r.style.setProperty('--text2', '#555');
+                r.style.setProperty('--border', '#DDD');
+            } else if (c === 'gray') {
+                r.style.setProperty('--bg', '#2D2D2D');
+                r.style.setProperty('--bg2', '#3D3D3D');
+                r.style.setProperty('--bg3', '#4D4D4D');
+                r.style.setProperty('--text', '#F0F0F0');
+                r.style.setProperty('--text2', '#AAA');
+                r.style.setProperty('--border', '#555');
+            } else {
+                r.style.setProperty('--bg', '#0D0D0D');
+                r.style.setProperty('--bg2', '#1A1A1A');
+                r.style.setProperty('--bg3', '#242424');
+                r.style.setProperty('--text', '#FFF');
+                r.style.setProperty('--text2', '#AAA');
+                r.style.setProperty('--border', '#333');
+            }
+            document.querySelectorAll('.color-btn').forEach(b => {
+                const name = b.textContent;
+                b.classList.toggle('active', 
+                    (name === 'أسود' && c === 'dark') || 
+                    (name === 'أبيض' && c === 'white') || 
+                    (name === 'رمادي' && c === 'gray'));
+            });
+        }
+
+        function toggleLang() {
+            lang = lang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('khayrLang', lang);
+            applyLang(lang);
+            applyColor(color);
+            if (user) {
+                updateDate();
+                renderPillars();
+                renderJournals();
+            }
+        }
+
+        function applyLang(l) {
+            const tr = t[l];
+            document.body.dir = l === 'ar' ? 'rtl' : 'ltr';
+            document.body.classList.toggle('en', l === 'en');
+            document.getElementById('langText').textContent = l === 'ar' ? 'EN' : 'عربي';
+            document.getElementById('loginSub').textContent = tr.loginSub;
+            document.getElementById('emailLbl').textContent = tr.emailLbl;
+            document.getElementById('passLbl').textContent = tr.passLbl;
+            document.getElementById('loginBtn').textContent = tr.loginBtn;
+            document.getElementById('forgotLnk').textContent = tr.forgotLnk;
+            document.getElementById('noAcc').textContent = tr.noAcc;
+            document.getElementById('regLnk').textContent = tr.regLnk;
+            document.getElementById('regSub').textContent = tr.regSub;
+            document.getElementById('nameLbl').textContent = tr.nameLbl;
+            document.getElementById('regEmailLbl').textContent = tr.regEmailLbl;
+            document.getElementById('regPassLbl').textContent = tr.regPassLbl;
+            document.getElementById('confirmLbl').textContent = tr.confirmLbl;
+            document.getElementById('regBtn').textContent = tr.regBtn;
+            document.getElementById('hasAcc').textContent = tr.hasAcc;
+            document.getElementById('loginLnk').textContent = tr.loginLnk;
+            document.getElementById('forgotSub').textContent = tr.forgotSub;
+            document.getElementById('forgotEmailLbl').textContent = tr.forgotEmailLbl;
+            document.getElementById('forgotBtn').textContent = tr.forgotBtn;
+            document.getElementById('backLnk').textContent = tr.backLnk;
+            document.getElementById('journalTitle').textContent = tr.journalTitle;
+            document.getElementById('dateLbl').textContent = tr.dateLbl;
+            document.getElementById('moodLbl').textContent = tr.moodLbl;
+            document.getElementById('contentLbl').textContent = tr.contentLbl;
+            document.getElementById('greeting').textContent = new Date().getHours() < 17 ? tr.greeting : tr.eveningGreeting;
+        }
+
+        function rotateQuote() {
+            document.getElementById('quoteText').textContent = '"' + quotes[Math.floor(Math.random() * quotes.length)] + '"';
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('dashboard').style.display = 'none';
+            document.querySelectorAll('.auth-error, .auth-success').forEach(e => e.classList.remove('show'));
+        }
+
+        function showDash() {
+            document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
+            document.getElementById('dashboard').style.display = 'block';
+        }
+
+        function updateDate() {
+            const now = new Date();
+            const tr = t[lang];
+            document.getElementById('dayName').textContent = tr.dayNames[now.getDay()];
+            document.getElementById('fullDate').textContent = now.getDate() + ' ' + tr.months[now.getMonth()] + ' ' + now.getFullYear();
+            document.getElementById('greeting').textContent = now.getHours() < 17 ? tr.greeting : tr.eveningGreeting;
+        }
+
+        function doLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('emailIn').value.trim();
+            const pass = document.getElementById('passIn').value;
+            const tr = t[lang];
+
+            if (!email || !pass) {
+                document.getElementById('loginErr').textContent = tr.errEmail;
+                document.getElementById('loginErr').classList.add('show');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('khayrUsers'));
+            const found = users.find(u => u.email === email && u.password === pass);
+
+            if (found) {
+                localStorage.setItem('khayrUser', email);
+                user = email;
+                showDash();
+                renderPillars();
+                renderJournals();
+                updateDate();
+            } else {
+                document.getElementById('loginErr').textContent = tr.errWrong;
+                document.getElementById('loginErr').classList.add('show');
+            }
+        }
+
+        function doRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('nameIn').value.trim();
+            const email = document.getElementById('regEmailIn').value.trim();
+            const pass = document.getElementById('regPassIn').value;
+            const confirm = document.getElementById('confirmIn').value;
+            const tr = t[lang];
+
+            if (!name) { document.getElementById('regErr').textContent = tr.errName; document.getElementById('regErr').classList.add('show'); return; }
+            if (!email) { document.getElementById('regErr').textContent = tr.errEmail; document.getElementById('regErr').classList.add('show'); return; }
+            if (pass.length < 8) { document.getElementById('regErr').textContent = tr.errShort; document.getElementById('regErr').classList.add('show'); return; }
+            if (pass !== confirm) { document.getElementById('regErr').textContent = tr.errMatch; document.getElementById('regErr').classList.add('show'); return; }
+
+            const users = JSON.parse(localStorage.getItem('khayrUsers'));
+            if (users.some(u => u.email === email)) {
+                document.getElementById('regErr').textContent = tr.errExists;
+                document.getElementById('regErr').classList.add('show');
+                return;
+            }
+
+            users.push({ email, password: pass, name });
+            localStorage.setItem('khayrUsers', JSON.stringify(users));
+            document.getElementById('regSuccess').textContent = tr.successReg;
+            document.getElementById('regSuccess').classList.add('show');
+
+            setTimeout(() => {
+                showPage('loginPage');
+                document.getElementById('emailIn').value = email;
+            }, 1500);
+        }
+
+        function doForgot(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmailIn').value.trim();
+            const users = JSON.parse(localStorage.getItem('khayrUsers'));
+            const tr = t[lang];
+
+            if (!users.some(u => u.email === email)) {
+                document.getElementById('forgotErr').textContent = tr.errNotFound;
+                document.getElementById('forgotErr').classList.add('show');
+                return;
+            }
+
+            document.getElementById('forgotSuccess').textContent = tr.successForgot;
+            document.getElementById('forgotSuccess').classList.add('show');
+
+            setTimeout(() => showPage('loginPage'), 2000);
+        }
+
+        function logout() {
+            localStorage.removeItem('khayrUser');
+            user = null;
+            showPage('loginPage');
+            document.getElementById('emailIn').value = '';
+            document.getElementById('passIn').value = '';
+        }
+
+        function renderPillars() {
+            const grid = document.getElementById('pillarsGrid');
+            grid.innerHTML = '';
+
+            pillars.forEach(p => {
+                const tasks = JSON.parse(localStorage.getItem('khayrTasks'))[p.id] || [];
+                const done = tasks.filter(t => t.completed).length;
+                const total = tasks.length;
+                const pct = total > 0 ? (done / total) * 100 : 0;
+
+                const div = document.createElement('div');
+                div.className = 'pillar';
+                div.onclick = () => openPillar(p.id);
+                div.innerHTML = `
+                    <h3>${lang === 'ar' ? p.name : p.en}</h3>
+                    <span>${p.en}</span>
+                    <div class="pillar-bar"><div class="pillar-fill" style="width:${pct}%"></div></div>
+                    <div class="pillar-stat"><span>${done}/${total}</span><span>${Math.round(pct)}%</span></div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function openPillar(id) {
+            currentPillar = id;
+            const p = pillars.find(x => x.id === id);
+            document.getElementById('pillarTitle').textContent = lang === 'ar' ? p.name : p.en;
+            renderTasks();
+            document.getElementById('pillarModal').classList.add('show');
+        }
+
+        function closePillar() {
+            document.getElementById('pillarModal').classList.remove('show');
+            currentPillar = null;
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('tasksList');
+            const tasks = JSON.parse(localStorage.getItem('khayrTasks'))[currentPillar] || [];
+            const tr = t[lang];
+
+            if (tasks.length === 0) {
+                list.innerHTML = '<div class="empty">' + tr.noTasks + '</div>';
+                return;
+            }
+
+            list.innerHTML = tasks.map((task, i) => `
+                <div class="task ${task.completed ? 'done' : ''}">
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${i})">
+                    <span>${task.text}</span>
+                    <button class="task-del" onclick="deleteTask(${i})">حذف</button>
+                </div>
+            `).join('');
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const all = JSON.parse(localStorage.getItem('khayrTasks'));
+            all[currentPillar].push({ text, completed: false });
+            localStorage.setItem('khayrTasks', JSON.stringify(all));
+
+            input.value = '';
+            renderTasks();
+            renderPillars();
+        }
+
+        function toggleTask(i) {
+            const all = JSON.parse(localStorage.getItem('khayrTasks'));
+            all[currentPillar][i].completed = !all[currentPillar][i].completed;
+            localStorage.setItem('khayrTasks', JSON.stringify(all));
+            renderTasks();
+            renderPillars();
+        }
+
+        function deleteTask(i) {
+            const all = JSON.parse(localStorage.getItem('khayrTasks'));
+            all[currentPillar].splice(i, 1);
+            localStorage.setItem('khayrTasks', JSON.stringify(all));
+            renderTasks();
+            renderPillars();
+        }
+
+        document.getElementById('taskInput')?.addEventListener('keypress', e => {
+            if (e.key === 'Enter') addTask();
+        });
+
+        function openJournal(entry = null) {
+            editJournalId = entry ? entry.id : null;
+            currentMood = entry ? entry.mood : null;
+            document.getElementById('journalDate').value = entry ? entry.date : new Date().toISOString().split('T')[0];
+            document.getElementById('journalContent').value = entry ? entry.content : '';
+            document.querySelectorAll('.mood-opt').forEach(el => el.classList.toggle('selected', el.dataset.mood === currentMood));
+            document.getElementById('journalModal').classList.add('show');
+        }
+
+        function closeJournal() {
+            document.getElementById('journalModal').classList.remove('show');
+            editJournalId = null;
+            currentMood = null;
+        }
+
+        function pickMood(el) {
+            document.querySelectorAll('.mood-opt').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+            currentMood = el.dataset.mood;
+        }
+
+        function saveJournal() {
+            const content = document.getElementById('journalContent').value.trim();
+            const date = document.getElementById('journalDate').value;
+            if (!content) return;
+
+            const journals = JSON.parse(localStorage.getItem('khayrJournals'));
+
+            if (editJournalId) {
+                const idx = journals.findIndex(j => j.id === editJournalId);
+                if (idx !== -1) journals[idx] = { ...journals[idx], content, date, mood: currentMood };
+            } else {
+                journals.unshift({ id: Date.now(), content, date, mood: currentMood || 'okay', createdAt: new Date().toISOString() });
+            }
+
+            localStorage.setItem('khayrJournals', JSON.stringify(journals));
+            closeJournal();
+            renderJournals();
+        }
+
+        function renderJournals() {
+            const list = document.getElementById('journalList');
+            const journals = JSON.parse(localStorage.getItem('khayrJournals')) || [];
+            const tr = t[lang];
+            const moods = { great: '😀', good: '🙂', okay: '😐', bad: '😔', terrible: '😢' };
+
+            if (journals.length === 0) {
+                list.innerHTML = '<div class="empty">' + tr.noJournals + '</div>';
+                return;
+            }
+
+            list.innerHTML = journals.map(j => `
+                <div class="entry" onclick="openJournal(j)">
+                    <div class="entry-head">
+                        <span class="entry-date">${formatDate(j.date)}</span>
+                        <span class="entry-mood">${moods[j.mood]}</span>
+                    </div>
+                    <div class="entry-content">${j.content}</div>
+                </div>
+            `).join('');
+        }
+
+        function formatDate(d) {
+            const date = new Date(d);
+            const tr = t[lang];
+            return tr.dayNames[date.getDay()] + '، ' + date.getDate() + ' ' + tr.months[date.getMonth()];
+        }
+
+        init();
+    </script>
+</body>
+</html>
